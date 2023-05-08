@@ -1,0 +1,222 @@
+body {
+    margin: 0;
+  }
+
+.wrap{
+    width: 100%;
+    min-height: 100vh;
+    margin: 0 auto;
+    background-color: #628E90;
+    /* padding:10px 30px; */
+    padding-top: 10px;
+    color:#3C2317;
+    font-family: "Helvetica Neue", "Helvetica", "Hiragino Sans", "Hiragino Kaku Gothic ProN", "Arial", "Yu Gothic", "Meiryo", sans-serif;
+    font-size: 1rem;
+    line-height: 150%;
+}
+
+.login {
+    height: 50px;
+    display: flex;
+    width: 100%;
+    align-items:center;
+    margin-bottom: 10px;
+}
+
+.login img {
+    height:50px ;
+    width:50px;
+    border-radius: 25px;
+    margin-right: 10px;
+    margin-left: 30px;
+}
+
+#name {
+    color: #F5EFE6;
+    font-weight: bold;
+}
+
+#out {
+    margin-left: auto;
+    margin-right: 30px;
+    }
+
+#output {
+    height: 85vh;
+    margin:0 30px;
+    overflow-x: hidden;
+}
+
+.my_msg {
+    padding: 24px 24px 15px 24px;
+    background-color: #B4CDE6;
+    max-width: 60%;
+    position: relative;
+    margin: 0 15px 1.5em 0;
+    border-radius: 10px;
+    margin-left: auto;
+    /* margin-bottom: 18px; */
+    white-space: pre-wrap;
+}
+
+.my_msg:before {
+    content: "";
+    position: absolute;
+    top: 50%;
+    left: 100%;
+    margin-top: -15px;
+    border: 8px solid transparent;
+    border-left: 16px solid #B4CDE6;
+}
+
+.other_msg{
+    padding: 24px 24px 15px 24px;
+    background-color: #F5EFE6;
+    max-width: 60%;
+    position: relative;
+    margin: 0 0 1.5em 25px;
+    border-radius: 10px;
+    white-space: pre-wrap;    
+}
+
+.other_msg:before {
+    content: "";
+    position: absolute;
+    left: -22px;
+    margin-top: -6px;
+    border: 8px solid transparent;
+    border-right: 16px solid #F5EFE6;
+}
+
+
+
+.box {
+    width: 100%;
+    position: fixed;
+    bottom: 0;
+}
+.c_box {
+    width: 100%;
+    display: flex;
+}
+
+#text{
+    width: 85%;
+    padding:10px;
+    background-color: #F5EFE6;
+    border: none;
+    font-size: 1rem;
+}
+
+#send {
+    display: block;
+    height:65px;
+}
+
+.n {
+    display: flex;
+    justify-content: end;
+    align-items: center;
+    font-size: 0.8rem;
+    /* font-weight: bold;    */
+}
+
+button {
+    border: none;
+    background-color: #3C2317;
+    color:#F5EFE6;
+    padding: 10px 15px;
+    border-radius: 10px;
+    font-weight: bold;
+}
+
+.del {
+    display: flex;
+}
+
+.del_btn img {
+    width: 18px;
+    height: 18px;
+}
+
+.ydm {
+    display: flex;
+    justify-content: end;
+    align-items: center;
+    font-size: 0.8rem;
+}
+
+.btn{
+    margin-left: 10px;
+}
+
+.li_btn {
+    height: 100px;
+    width: 180px;
+    background-color: #628E90;
+    color: #F5EFE6;
+    font-size: 1.6rem;
+    line-height: 100%;
+}
+
+.li_btn:hover {
+    opacity:0.7;
+}
+
+.li_btn:active{
+    background-color: #F5EFE6;
+    color: #3C2317;
+}
+
+.icon {
+    border-radius: 25px;
+}
+
+
+@media screen and (min-width: 960px) {
+    .wrap {
+        /* width: 60%; */
+        max-width: 600px;
+      }
+
+    .box {
+        /* width: 60%; */
+        max-width: 600px;
+        position: fixed;
+        bottom: 0;
+    }
+  }
+
+@media screen and (min-width: 601px) and (max-width: 959px)  {
+    .wrap {
+        /* width: 80%; */
+        max-width: 600px;
+      }
+
+    .box {
+        width: 100%;
+        max-width: 600px;
+        position: fixed;
+        bottom: 0;
+    }
+  }
+
+@media screen and (max-width: 600px) {
+    .wrap {
+        box-sizing: border-box;
+        width: 100%;
+        max-width: none;
+    }
+    
+    #text{
+        max-width: 100%;
+        padding:10px;
+        background-color: #F5EFE6;
+        border: none;
+    }
+    
+    #output {
+        height: 85vh;
+        margin:0 15px;
+    }
+}

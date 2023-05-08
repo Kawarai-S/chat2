@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8" name="viewport" content="width=device-width, initial-scale=1">
+<title>Firebase:v9:Chatアプリ</title>
+<link rel="stylesheet" href="css/reset.css">
+<link rel="stylesheet" href="css/kadai.css">
+<!-- sweetalert2 -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11.0.17/dist/sweetalert2.min.css">
+
+</head>
+<body>
+
+<!-- コンテンツ表示画面 -->
+
+<div class="wrap">
+    <div class="login">
+        <img src="" id="prof">
+        <div id="name"></div> 
+        <button id="out">Logout</button>
+    </div>
+    <div id="output" style="overflow: auto;"></div>
+    <div class="box">
+        
+            <!-- <input type="text" id="uname" placeholder="Your Name..."> -->
+        <div class="c_box">
+            <textarea id="text" placeholder="To talk in the discord!"></textarea>
+            <button id="send">Submit</button>
+        </div>
+    </div>
+ </div>
+
+<!--/ コンテンツ表示画面 -->
+
+
+<!-- JQuery -->
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+<!-- JQuery -->
+
+<!-- sweetalert2 -->
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11.0.17/dist/sweetalert2.min.js"></script>
+<!-- sweetalert2 -->
+
+<!--** 以下Firebase **-->
+<script type="module">
+    // Import the functions you need from the SDKs you need
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/9.21.0/firebase-app.js";
+    import { getDatabase, ref, push, set, onChildAdded, remove, onChildRemoved } 
+    from "https://www.gstatic.com/firebasejs/9.21.0/firebase-database.js"; //9.20.0のところは上下とも一致させる
+    import { getAuth, signInWithPopup, GoogleAuthProvider, signOut, onAuthStateChanged } 
+    from "https://www.gstatic.com/firebasejs/9.21.0/firebase-auth.js";
+    // TODO: Add SDKs for Firebase products that you want to use
+    // https://firebase.google.com/docs/web/setup#available-libraries
+  
+    // Your web app's Firebase configuration
+    const firebaseConfig = {
+    
+    };
+  
+    // Initialize Firebase
+    const app = initializeApp(firebaseConfig);//firebaseに繋げてくれている。
+    const db  = getDatabase(app); //RealtimeDataBaseを使う設定
+    const dbRef = ref(db,"chat"); //RealtimeDatabaseの"chat"を使う設定
+
+    //googleAUth
+    const provider = new GoogleAuthProvider();
+    provider.addScope('https://www.googleapis.com/auth/contacts.readonly');
+    const auth = getAuth();
+
+    // onAuthStateChangedの実行前に、uidを初期化する
+    let uid = null;
+    // onAuthStateChangedの実行前に、userPhotoを初期化する
+    let userPhoto = null;
+
+    //ログインしていれば以下の動作を処理
+    onAuthStateChanged(auth, (user) => {
+        if (user) {
+            uid = user.uid;
+            //ユーザー情報取得
+            if (user !== null) {
+                user.providerData.forEach((profile) => {
+                    //Login情報取得
+                    $("#name").text(profile.displayName); //HTML要素のtextを上書きする
+                    $("#prof").attr("src",profile.photoURL); //HTML要素の属性を変更する
+                    userPhoto = profile.photoURL; //変数userPhotoにプロフィール写真のURLを格納する
+                });
+            }
+        } else {
+            _redirect();  // サインアウト
+        }
+    });
+
+    //送信ボタンを押したら送信
+    $("#send").on("click",function(){
+        send();
+    });
+
+    //送信する関数
+    function send(){
+        const timestamp = new Date().getTime();//日時を取得する
+        const msg = {                     //msgの中に以下の情報を配列として格納
+            text  : $("#text").val(), //フォームのテキスト
+            uid   : uid,              //送信者のID
+            timestamp : timestamp,    //送信時の日時
+            userPhoto : userPhoto     //送信者のプロフィール写真のURL
+            };
+        const newPostRef = push(dbRef);//ユニークキーを発行する
+        set(newPostRef, msg);//ユニークキーにmsgのオブジェクトデータを紐付ける
+        $("#output").scrollTop($("#output")[0].scrollHeight);//最新の場所にスクロールされる
+        $("#text").val("");//送信したら入力画面の中身を空にする
+    };
+
+    // //エンター押したら送信する。
+    // $("#text").on("keydown",function (e) {
+    //     if(e.key == "Enter"){
+    //         send();
+    //     }
+    // });
+
+
+    //データベースからデータを取得する
+    onChildAdded(dbRef,function(data){ //dbRefを参照、新しい子要素の情報をもつオブジェクト(data)を引数とする。
+        const msg = data.val(); //objectデータを取得
+        const key = data.key; //ユニークkeyを取得。削除するときに使う
+        
+        // 日時を取得
+        const timestamp = msg.timestamp;//msgの中のtimestampを取得
+        const date = new Date(timestamp);
+        const year = date.getFullYear();
+        const month = ("0" + (date.getMonth() + 1)).slice(-2);
+        const day = ("0" + date.getDate()).slice(-2);
+        const hours = date.getHours().toString().padStart(2, '0'); // 桁揃え
+        const minutes = date.getMinutes().toString().padStart(2, '0'); // 桁揃え
+        const ydm = year + "/" + month + "/" + day + " " + hours + ":" + minutes;
+
+        const ismmsg = msg.uid === uid; //当該msg発信者のuidとログインuidを比較
+        const msgclass = ismmsg ? "my_msg":"other_msg"; //trueなら前者、falseなら後者が格納される
+        //削除ボタンを付与 
+        const delBtn = ismmsg ? '<div class="del_btn"><img src="img/icon01.png"></div>': '';
+        //プロフィール画像を付与
+        const photo = ismmsg ? '': '<img class="icon" src="'+msg.userPhoto+'" width="50" height="50">';
+        
+        const h ='<div class="del" data-key="' + key + '">'+photo+'<div class="'+ msgclass +'""><div class="m"><p>'+msg.text+'</p></div><div class="ydm"><p>'+ ydm +'<p><div class="btn">'+ delBtn+'</div></div></div></div>';
+        $("#output").append(h);
+        $("#output").scrollTop($("#output")[0].scrollHeight);
+    });
+            
+    //クリックで削除
+    $(document).on("click",".btn",function(){
+        const key = $(this).parent().parent().parent().data("key");//クリックした当該要素を含む親要素の持つkeyを指定する
+        console.log(key);
+        // if(confirm("この投稿を削除しますか？")){//アラートを表示
+        Swal.fire({
+            title: 'この投稿を削除しますか？',
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#3085d6',
+            cancelButtonColor: '#d33',
+            confirmButtonText: 'Yes'
+        }).then((result) => {
+            //ウィンドウを閉じるとDismissReason（キャンセルボタン押した場合は"cancel")という値が返される
+            if (result.dismiss !== Swal.DismissReason.cancel) { //キャンセルボタン以外がクリックされたら
+            remove(ref(db, "chat/" + key));
+            $(this).parent().parent().remove();
+            Swal.fire(
+                '削除しました',
+                '投稿を削除しました',
+                'success'
+            )
+            } else { // キャンセルボタンがクリックされたら
+            Swal.fire(
+                'キャンセルしました',
+                '投稿は削除されませんでした',
+                'info'
+            )
+            }});
+    });
+
+    //logout
+    $("#out").on("click",function(){
+        signOut(auth).then(() =>{
+            _redirect();
+        }).catch((error) =>{
+            console.erro(error);
+        })
+    });
+
+    //redirect=遷移先のページを指定する
+    function _redirect(){
+        location.href="k_login.html";
+    }   
+
+
+</script>
+</body>
+</html>
